@@ -1,3 +1,5 @@
+import { getCreatorKitSprite } from "./CreatorKitAssets.js";
+
 export const ART_STYLE = Object.freeze({
   outline: "#171914",
   outlineWidth: 3,
@@ -143,6 +145,19 @@ export function drawRuin(ctx, x, y, scale = 1) {
 
 export function drawWorldObject(ctx, object) {
   if (!object) return;
+
+  const spriteName = object.kind === "tree" ? "tree"
+    : object.kind === "bush" ? "bush"
+      : object.kind === "rock" ? "rock" : null;
+  const sprite = spriteName ? getCreatorKitSprite(spriteName) : null;
+
+  if (sprite) {
+    const size = (object.kind === "tree" ? 56 : 42) * object.scale;
+    ctx.drawImage(sprite, object.x - size / 2, object.y - size / 2, size, size);
+    return;
+  }
+
+  // Vector fallback keeps the world visible while local sprites are loading.
   if (object.kind === "tree") drawTree(ctx, object.x, object.y, object.scale);
   else if (object.kind === "pine") drawPine(ctx, object.x, object.y, object.scale);
   else if (object.kind === "deadTree") drawTree(ctx, object.x, object.y, object.scale, true);
