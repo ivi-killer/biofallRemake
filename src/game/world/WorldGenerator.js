@@ -6,10 +6,16 @@ const BIOMES = Object.freeze({
   highlands: { name: "Tierras altas", ground: "#999d91", patch: "#818a83", accent: "#c4c4ae" }
 });
 
+const STAGE_SIZE = 320;
+const stageCache = new Map();
+
 export const WORLD_CONFIG = Object.freeze({
   size: 3600,
   halfSize: 1800,
-  chunkSize: 320,
+  stageSize: STAGE_SIZE,
+  activeStageRadius: 1,
+  // Compatibility aliases: a stage is the same streamed unit as the former chunk.
+  chunkSize: STAGE_SIZE,
   activeChunkRadius: 1
 });
 
@@ -27,7 +33,11 @@ export function getBiomeAt(x, y) {
 }
 
 export function getChunk(cx, cy) {
-  const size = WORLD_CONFIG.chunkSize;
+  const key = getChunkKey(cx, cy);
+  const cached = stageCache.get(key);
+  if (cached) return cached;
+
+  const size = WORLD_CONFIG.stageSize;
   const x = cx * size;
   const y = cy * size;
   const centerX = x + size / 2;
@@ -51,7 +61,7 @@ export function getChunk(cx, cy) {
     else if (variant > 0.62) kind = "bush";
 
     objects.push({
-      id: `${cx}:${cy}:${i}`,
+      id: cx + ":" + cy + ":" + i,
       kind,
       x: px,
       y: py,
@@ -59,7 +69,13 @@ export function getChunk(cx, cy) {
     });
   }
 
-  return { cx, cy, x, y, size, biome, objects };
+  const stage = { cx, cy, x, y, size, biome, objects };
+  stageCache.set(key, stage);
+  return stage;
+}
+
+export function getStage(stageX, stageY) {
+  return getChunk(stageX, stageY);
 }
 
 export function getBiomeInfo(biome) {
@@ -67,9 +83,17 @@ export function getBiomeInfo(biome) {
 }
 
 export function getChunkKey(cx, cy) {
-  return `${cx},${cy}`;
+  return String(cx) + "," + String(cy);
+}
+
+export function getStageKey(stageX, stageY) {
+  return getChunkKey(stageX, stageY);
 }
 
 export function worldToChunk(value) {
-  return Math.floor(value / WORLD_CONFIG.chunkSize);
+  return Math.floor(value / WORLD_CONFIG.stageSize);
+}
+
+export function worldToStage(value) {
+  return worldToChunk(value);
 }

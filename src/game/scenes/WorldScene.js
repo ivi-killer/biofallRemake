@@ -5,7 +5,7 @@ import { RigidBody } from "../../engine/physics/RigidBody.js";
 import { PlayerController } from "../components/PlayerController.js";
 import { PlayerVisual } from "../components/PlayerVisual.js";
 import {
-  WORLD_CONFIG, getChunk, getBiomeInfo, getChunkKey, worldToChunk
+  WORLD_CONFIG, getStage, getBiomeInfo, getStageKey, worldToStage
 } from "../world/WorldGenerator.js";
 
 function noise(x, y, seed = 0) {
@@ -129,8 +129,8 @@ export class WorldScene extends Scene {
   constructor() {
     super("world");
     this.player = null;
-    this.obstacles = new Map();
-    this.loadedCenter = null;
+    this.activeStages = new Map();
+    this.loadedStageCenter = null;
   }
 
   onEnter() {
@@ -138,13 +138,18 @@ export class WorldScene extends Scene {
     const player = new Entity("Player");
     player.transform.position.set(0, 0);
     player.addComponent(new CircleCollider({ radius: 11 }));
-    player.addComponent(new PlayerController({ speed: 190 }));
+    player.addComponent(new PlayerController({
+      speed: 220,
+      acceleration: 1250,
+      deceleration: 1750
+    }));
     player.addComponent(new RigidBody({ mass: 1 }));
     player.addComponent(new PlayerVisual());
     entities.add(player);
+
     this.player = player;
-    this.context.services.get("camera").follow(player.transform);
-    this.#refreshActiveChunks(true);
+    this.context.services.get("camera").follow(player);
+    this.#refreshActiveStages(true);
 
     const half = WORLD_CONFIG.halfSize;
     const bounds = [
@@ -153,12 +158,15 @@ export class WorldScene extends Scene {
       { x: 0, y: -half - 15, width: WORLD_CONFIG.size, height: 30 },
       { x: 0, y: half + 15, width: WORLD_CONFIG.size, height: 30 }
     ];
-    for (const wall of bounds) this.#addCollider("World boundary", wall.x, wall.y,
-      new BoxCollider({ width: wall.width, height: wall.height }));
+
+    for (const wall of bounds) {
+      this.#addCollider("World boundary", wall.x, wall.y,
+        new BoxCollider({ width: wall.width, height: wall.height }));
+    }
   }
 
   update() {
-    this.#refreshActiveChunks();
+    this.#refreshActiveStages();
   }
 
   #addCollider(name, x, y, collider) {
@@ -169,34 +177,39 @@ export class WorldScene extends Scene {
     return entity;
   }
 
-  #refreshActiveChunks(force = false) {
+  #refreshActiveStages(force = false) {
     if (!this.player) return;
-    const cx = worldToChunk(this.player.transform.position.x);
-    const cy = worldToChunk(this.player.transform.position.y);
-    if (!force && this.loadedCenter?.cx === cx && this.loadedCenter?.cy === cy) return;
+
+    const stageX = worldToStage(this.player.transform.position.x);
+    const stageY = worldToStage(this.player.transform.position.y);
+    if (!force && this.loadedStageCenter?.x === stageX &&
+        this.loadedStageCenter?.y === stageY) return;
 
     const wanted = new Set();
-    const radius = WORLD_CONFIG.activeChunkRadius;
-    for (let x = cx - radius; x <= cx + radius; x += 1) {
-      for (let y = cy - radius; y <= cy + radius; y += 1) {
-        wanted.add(getChunkKey(x, y));
+    const radius = WORLD_CONFIG.activeStageRadius;
+
+    for (let x = stageX - radius; x <= stageX + radius; x += 1) {
+      for (let y = stageY - radius; y <= stageY + radius; y += 1) {
+        wanted.add(getStageKey(x, y));
       }
     }
 
     const entities = this.context.services.get("entities");
-    for (const [key, list] of this.obstacles) {
+    for (const [key, list] of this.activeStages) {
       if (wanted.has(key)) continue;
       for (const entity of list) entities.remove(entity);
-      this.obstacles.delete(key);
+      this.activeStages.delete(key);
     }
 
-    for (let x = cx - radius; x <= cx + radius; x += 1) {
-      for (let y = cy - radius; y <= cy + radius; y += 1) {
-        const key = getChunkKey(x, y);
-        if (this.obstacles.has(key)) continue;
-        const chunk = getChunk(x, y);
+    for (let x = stageX - radius; x <= stageX + radius; x += 1) {
+      for (let y = stageY - radius; y <= stageY + radius; y += 1) {
+        const key = getStageKey(x, y);
+        if (this.activeStages.has(key)) continue;
+
+        const stage = getStage(x, y);
         const list = [];
-        for (const object of chunk.objects) {
+
+        for (const object of stage.objects) {
           let collider = null;
           if (["tree", "pine", "deadTree"].includes(object.kind)) {
             collider = new CircleCollider({ radius: 12 * object.scale });
@@ -205,12 +218,17 @@ export class WorldScene extends Scene {
           } else if (object.kind === "ruin") {
             collider = new BoxCollider({ width: 34 * object.scale, height: 24 * object.scale });
           }
-          if (collider) list.push(this.#addCollider(object.kind, object.x, object.y, collider));
+
+          if (collider) {
+            list.push(this.#addCollider(object.kind, object.x, object.y, collider));
+          }
         }
-        this.obstacles.set(key, list);
+
+        this.activeStages.set(key, list);
       }
     }
-    this.loadedCenter = { cx, cy };
+
+    this.loadedStageCenter = { x: stageX, y: stageY };
   }
 
   render(context) {
@@ -221,7 +239,7 @@ export class WorldScene extends Scene {
     const right = camera.position.x + halfWidth;
     const top = camera.position.y - halfHeight;
     const bottom = camera.position.y + halfHeight;
-    const size = WORLD_CONFIG.chunkSize;
+    const size = WORLD_CONFIG.stageSize;
     const minX = Math.max(-WORLD_CONFIG.halfSize, Math.floor(left / size) * size);
     const maxX = Math.min(WORLD_CONFIG.halfSize, right);
     const minY = Math.max(-WORLD_CONFIG.halfSize, Math.floor(top / size) * size);
@@ -233,32 +251,33 @@ export class WorldScene extends Scene {
 
     for (let x = minX; x < maxX; x += size) {
       for (let y = minY; y < maxY; y += size) {
-        const chunk = getChunk(Math.floor(x / size), Math.floor(y / size));
-        const palette = getBiomeInfo(chunk.biome);
+        const stage = getStage(Math.floor(x / size), Math.floor(y / size));
+        const palette = getBiomeInfo(stage.biome);
         context.fillStyle = palette.ground;
-        context.fillRect(chunk.x, chunk.y, size, size);
+        context.fillRect(stage.x, stage.y, size, size);
 
         for (let i = 0; i < 9; i += 1) {
-          const value = noise(chunk.cx * 9 + i, chunk.cy * 7 - i, 5);
+          const value = noise(stage.cx * 9 + i, stage.cy * 7 - i, 5);
           context.fillStyle = value > 0.5 ? palette.patch : palette.accent;
           context.globalAlpha = 0.1;
           context.beginPath();
-          context.ellipse(chunk.x + noise(i, chunk.cy, 8) * size,
-            chunk.y + noise(chunk.cx, i, 9) * size,
+          context.ellipse(stage.x + noise(i, stage.cy, 8) * size,
+            stage.y + noise(stage.cx, i, 9) * size,
             18 + value * 28, 13 + value * 18, value * 2, 0, Math.PI * 2);
           context.fill();
         }
         context.globalAlpha = 1;
 
         for (let i = 0; i < 30; i += 1) {
-          const gx = chunk.x + noise(i, chunk.cx, 12) * size;
-          const gy = chunk.y + noise(chunk.cy, i, 13) * size;
+          const gx = stage.x + noise(i, stage.cx, 12) * size;
+          const gy = stage.y + noise(stage.cy, i, 13) * size;
           context.fillStyle = palette.patch;
           context.globalAlpha = 0.24;
           context.fillRect(gx, gy, 2, 2);
         }
         context.globalAlpha = 1;
-        for (const object of chunk.objects) drawObject(context, object);
+
+        for (const object of stage.objects) drawObject(context, object);
       }
     }
 
@@ -271,12 +290,14 @@ export class WorldScene extends Scene {
   onExit() {
     const entities = this.context.services.get("entities");
     if (this.player) entities.remove(this.player);
-    for (const list of this.obstacles.values()) {
+
+    for (const list of this.activeStages.values()) {
       for (const entity of list) entities.remove(entity);
     }
-    this.obstacles.clear();
+
+    this.activeStages.clear();
     this.player = null;
-    this.loadedCenter = null;
+    this.loadedStageCenter = null;
     this.context.services.get("camera").follow(null);
   }
 }

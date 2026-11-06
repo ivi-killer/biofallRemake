@@ -9,8 +9,8 @@ async function start() {
   try {
     const game = createGame({ canvas: document.querySelector("#game-canvas") });
     await game.start();
-    version.textContent = `ENGINE ${game.version}`;
-    message.textContent = "Usa WASD o las flechas para moverte.";
+    version.textContent = "ENGINE " + game.version;
+    message.textContent = "WASD, flechas o joystick para moverte.";
     window.biofall = Object.freeze({ version: game.version, engine: game.engine });
     const joystick = new VirtualJoystick({ element: document.querySelector("#virtual-joystick"), input: game.engine.input });
     const debugPanel = new DebugPanel(game.engine);
