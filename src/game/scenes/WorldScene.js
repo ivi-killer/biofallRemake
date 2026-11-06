@@ -6,6 +6,7 @@ import { PlayerController } from "../components/PlayerController.js";
 import { PlayerVisual } from "../components/PlayerVisual.js";
 import { WORLD_CONFIG, getStage, getStageKey, worldToStage } from "../world/WorldGenerator.js";
 import { ART_STYLE, drawGroundDetails, drawWorldObject } from "../rendering/WorldAssets.js";
+import { preloadCreatorKitAssets } from "../rendering/CreatorKitAssets.js";
 
 export class WorldScene extends Scene {
   constructor() {
@@ -16,6 +17,7 @@ export class WorldScene extends Scene {
   }
 
   onEnter() {
+    preloadCreatorKitAssets();
     const entities = this.context.services.get("entities");
     const player = new Entity("Player");
     player.transform.position.set(0, 0);
