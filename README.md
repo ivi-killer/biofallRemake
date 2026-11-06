@@ -11,6 +11,12 @@ BioFall es un roguelike de supervivencia 2D con perspectiva cenital (top-down), 
 - Generación determinista y cacheada de etapas; los colisionadores se cargan alrededor del jugador y se retiran al alejarse.
 - Controles de teclado en PC y joystick virtual en dispositivos táctiles.
 
+## Recursos gráficos
+
+- Primera integración local del Creator Kit: árbol, arbusto y roca.
+- Los sprites se cargan desde archivos incluidos en el repositorio; el renderizado vectorial permanece como respaldo durante la carga.
+- La generación determinista y las dimensiones de colisión de los objetos no dependen del tamaño de los PNG/SVG.
+
 ## Controles
 
 - **WASD / flechas:** movimiento.
