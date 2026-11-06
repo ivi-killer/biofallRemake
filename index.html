@@ -17,6 +17,54 @@
       <span class="engine-version" id="engine-version">ENGINE 0.5.0</span>
     </section>
     <p class="corner-note">WASD / FLECHAS · MANTÉN PULSADO PARA MOVERTE EN MÓVIL</p>
+    <button class="debug-access" id="debug-access" type="button" aria-label="Abrir herramientas de depuración">DEV</button>
+    <section class="debug-gate" id="debug-gate" hidden>
+      <form class="debug-gate-card" id="debug-login">
+        <button class="debug-close" type="button" data-close-gate aria-label="Cerrar">×</button>
+        <span class="debug-kicker">BIOFALL / INTERNAL</span>
+        <h2>Herramientas de desarrollo</h2>
+        <label for="debug-password">Contraseña</label>
+        <input id="debug-password" type="password" inputmode="numeric" autocomplete="off" maxlength="16" placeholder="Introduce la contraseña">
+        <p class="debug-login-error" id="debug-login-error" role="alert"></p>
+        <button class="debug-primary" type="submit">Acceder</button>
+      </form>
+    </section>
+    <aside class="debug-panel" id="debug-panel" hidden aria-label="Panel de depuración">
+      <header class="debug-header">
+        <div><span class="debug-kicker">BIOFALL / DEVTOOLS</span><h2>Depuración</h2></div>
+        <button class="debug-close" type="button" data-close-panel aria-label="Cerrar">×</button>
+      </header>
+      <div class="debug-status"><i></i><span id="debug-engine-state">Motor activo</span><span id="debug-fps">0 FPS</span></div>
+      <section class="debug-section">
+        <h3>Estado del juego</h3>
+        <dl class="debug-stats">
+          <div><dt>Jugador X / Y</dt><dd id="debug-position">—</dd></div>
+          <div><dt>Velocidad X / Y</dt><dd id="debug-velocity">—</dd></div>
+          <div><dt>Entidades</dt><dd id="debug-entities">—</dd></div>
+          <div><dt>Colisionadores</dt><dd id="debug-colliders">—</dd></div>
+          <div><dt>Cámara / zoom</dt><dd id="debug-camera">—</dd></div>
+          <div><dt>Tiempo de juego</dt><dd id="debug-time">—</dd></div>
+        </dl>
+      </section>
+      <section class="debug-section">
+        <h3>Visualización</h3>
+        <label class="debug-toggle"><input id="debug-hitboxes" type="checkbox"> Mostrar hitboxes</label>
+      </section>
+      <section class="debug-section">
+        <h3>Herramientas del jugador</h3>
+        <label for="debug-speed">Velocidad <output id="debug-speed-value">190</output></label>
+        <input id="debug-speed" type="range" min="50" max="500" step="10" value="190">
+        <div class="debug-actions">
+          <button type="button" id="debug-teleport">Volver al centro</button>
+          <button type="button" id="debug-stop">Detener movimiento</button>
+        </div>
+      </section>
+      <section class="debug-section">
+        <div class="debug-log-heading"><h3>Registro de errores</h3><button type="button" id="debug-clear-log">Limpiar</button></div>
+        <pre class="debug-log" id="debug-log">Sin errores registrados.</pre>
+      </section>
+      <footer class="debug-footer"><button type="button" id="debug-pause">Pausar motor</button><span>F2 para abrir / cerrar</span></footer>
+    </aside>
   </main>
   <script type="module" src="./src/main.js"></script>
 </body>

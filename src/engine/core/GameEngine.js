@@ -8,6 +8,7 @@ import { Camera2D } from "../world/Camera2D.js";
 import { SceneManager } from "../scenes/SceneManager.js";
 import { EntityManager } from "../entities/EntityManager.js";
 import { PhysicsWorld } from "../physics/PhysicsWorld.js";
+import { Collider } from "../physics/Collider.js";
 
 export class GameEngine {
   static VERSION = "0.5.0";
@@ -26,6 +27,7 @@ export class GameEngine {
     this.scenes = this.services.register("scenes", new SceneManager(this.context));
     this.physics = this.services.register("physics", new PhysicsWorld(this.context));
     this.running = false;
+    this.debugDrawColliders = false;
     this.frameRequest = null;
     this.boundFrame = timestamp => this.#frame(timestamp);
   }
@@ -49,9 +51,32 @@ export class GameEngine {
     this.renderer.render(this.context);
     this.scenes.render(this.renderer.context, this.camera);
     this.entities.render(this.renderer.context, this.camera);
+    if (this.debugDrawColliders) this.#renderColliders();
     this.events.emit("engine:render", this.context);
     this.input.endFrame();
     this.frameRequest = requestAnimationFrame(this.boundFrame);
+  }
+  #renderColliders() {
+    const context = this.renderer.context;
+    context.save();
+    this.camera.applyTransform(context);
+    context.lineWidth = 1.5 / this.camera.zoom;
+    for (const entity of this.entities.getAll()) {
+      for (const component of entity.components.values()) {
+        if (!(component instanceof Collider) || !component.enabled) continue;
+        const shape = component.getShape();
+        context.strokeStyle = component.isTrigger ? "#f3cf63" : entity.name === "Player" ? "#62e7ff" : "#ff6f68";
+        context.beginPath();
+        if (shape.type === "circle") {
+          context.arc(shape.center.x, shape.center.y, shape.radius, 0, Math.PI * 2);
+        } else {
+          context.rect(shape.center.x - shape.halfWidth, shape.center.y - shape.halfHeight,
+            shape.halfWidth * 2, shape.halfHeight * 2);
+        }
+        context.stroke();
+      }
+    }
+    context.restore();
   }
   stop() {
     if (!this.running) return;
