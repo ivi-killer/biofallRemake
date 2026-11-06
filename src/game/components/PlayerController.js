@@ -3,9 +3,10 @@ import { RigidBody } from "../../engine/physics/RigidBody.js";
 import { Vector2 } from "../../engine/math/Vector2.js";
 
 export class PlayerController extends Component {
-  constructor({ speed = 190 } = {}) {
+  constructor({ speed = 190, pointerThreshold = 14 } = {}) {
     super();
     this.speed = speed;
+    this.pointerThreshold = pointerThreshold;
     this.direction = new Vector2();
   }
 
@@ -20,6 +21,14 @@ export class PlayerController extends Component {
     if (input.isKeyDown("KeyD") || input.isKeyDown("ArrowRight")) x += 1;
     if (input.isKeyDown("KeyW") || input.isKeyDown("ArrowUp")) y -= 1;
     if (input.isKeyDown("KeyS") || input.isKeyDown("ArrowDown")) y += 1;
+
+    if (x === 0 && y === 0 && input.pointer.down) {
+      const camera = this.context.services.get("camera");
+      const target = camera.screenToWorld(input.pointer);
+      x = target.x - this.entity.transform.position.x;
+      y = target.y - this.entity.transform.position.y;
+      if (Math.hypot(x, y) < this.pointerThreshold) x = y = 0;
+    }
 
     this.direction.set(x, y);
     if (x !== 0 || y !== 0) this.direction.normalize();

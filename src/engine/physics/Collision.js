@@ -47,8 +47,8 @@ function circleBox(circle, box) {
   const bottom = box.center.y + box.halfHeight;
   const closestX = Math.max(left, Math.min(circle.center.x, right));
   const closestY = Math.max(top, Math.min(circle.center.y, bottom));
-  let dx = closestX - circle.center.x;
-  let dy = closestY - circle.center.y;
+  const dx = closestX - circle.center.x;
+  const dy = closestY - circle.center.y;
   const distanceSquared = dx * dx + dy * dy;
 
   if (distanceSquared > circle.radius * circle.radius) return null;
@@ -71,7 +71,7 @@ function circleBox(circle, box) {
   distances.sort((a, b) => a.value - b.value);
   const nearest = distances[0];
   return {
-    normal: nearest.normal,
+    normal: nearest.normal.clone().scale(-1),
     penetration: circle.radius + nearest.value,
     point: nearest.point
   };

@@ -18,8 +18,8 @@ export class WorldScene extends Scene {
     const player = new Entity("Player");
     player.transform.position.set(0, 0);
     player.addComponent(new CircleCollider({ radius: 11 }));
-    player.addComponent(new RigidBody({ mass: 1 }));
     player.addComponent(new PlayerController({ speed: 190 }));
+    player.addComponent(new RigidBody({ mass: 1 }));
     player.addComponent(new PlayerVisual());
     entities.add(player);
     this.player = player;
