@@ -48,6 +48,11 @@ function groundShadow(ctx, rx, ry, alpha = 0.16) {
   ctx.fill();
 }
 
+function drawTrunk(ctx, color = "#795638") {
+  circle(ctx, 0, 0, 7.5, color, OUTLINE, 2.8);
+  circle(ctx, -2, -2, 2.2, "#a27a4d", null);
+}
+
 export function drawTree(ctx, x, y, scale = 1, dead = false) {
   ctx.save();
   ctx.translate(x, y);
@@ -58,14 +63,27 @@ export function drawTree(ctx, x, y, scale = 1, dead = false) {
     circle(ctx, -7, -5, 7, "#a88d68", "#514536", 2.5);
     circle(ctx, 8, 5, 6, "#a88d68", "#514536", 2.5);
     polygon(ctx, [[-2,-3],[3,-1],[8,5],[4,8],[-2,2]], "#765a3e", OUTLINE, 2.5);
+    drawTrunk(ctx, "#705239");
   } else {
     circle(ctx, -9, -7, 10, "#4b8547", OUTLINE, 2.4);
     circle(ctx, 8, -8, 10, "#4b8547", OUTLINE, 2.4);
     circle(ctx, 7, 9, 9, "#427b40", OUTLINE, 2.4);
     circle(ctx, -5, 3, 8, "#5a914b", OUTLINE, 2.2);
-    circle(ctx, 0, 0, 7.5, "#795638", OUTLINE, 2.8);
-    circle(ctx, -2, -2, 2.2, "#a27a4d", null);
+    drawTrunk(ctx);
   }
+  ctx.restore();
+}
+
+export function drawPine(ctx, x, y, scale = 1) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  groundShadow(ctx, 21, 18, 0.16);
+  circle(ctx, 0, 0, 19, "#315c3b", OUTLINE, 3);
+  circle(ctx, -6, -7, 8, "#47764a", OUTLINE, 2.3);
+  circle(ctx, 7, -5, 8, "#3d6c43", OUTLINE, 2.3);
+  circle(ctx, 5, 8, 7, "#3a6840", OUTLINE, 2.3);
+  drawTrunk(ctx, "#75543a");
   ctx.restore();
 }
 
@@ -126,7 +144,8 @@ export function drawRuin(ctx, x, y, scale = 1) {
 export function drawWorldObject(ctx, object) {
   if (!object) return;
   if (object.kind === "tree") drawTree(ctx, object.x, object.y, object.scale);
-  else if (object.kind === "pine" || object.kind === "deadTree") drawTree(ctx, object.x, object.y, object.scale, true);
+  else if (object.kind === "pine") drawPine(ctx, object.x, object.y, object.scale);
+  else if (object.kind === "deadTree") drawTree(ctx, object.x, object.y, object.scale, true);
   else if (object.kind === "rock") drawRock(ctx, object.x, object.y, object.scale);
   else if (object.kind === "bush") drawBush(ctx, object.x, object.y, object.scale);
   else if (object.kind === "cactus") drawCactus(ctx, object.x, object.y, object.scale);
