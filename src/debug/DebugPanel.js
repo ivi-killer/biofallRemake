@@ -17,8 +17,8 @@ export class DebugPanel {
     this.logElement = document.querySelector("#debug-log");
     this.logs = [];
     this.interval = null;
-    this.frameTimes = [];
-    this.lastFrame = performance.now();
+    this.lastSampleTime = performance.now();
+    this.lastSampleFrame = engine.time.frame;
     this.wasRunningBeforePause = true;
     this.boundKeydown = event => {
       if (event.code === "F2") {
@@ -108,18 +108,18 @@ export class DebugPanel {
   refresh() {
     if (this.panel.hidden) return;
     const now = performance.now();
-    const elapsed = now - this.lastFrame;
-    this.lastFrame = now;
-    if (elapsed > 0) this.frameTimes.push(elapsed);
-    if (this.frameTimes.length > 30) this.frameTimes.shift();
-    const average = this.frameTimes.reduce((sum, value) => sum + value, 0) / Math.max(1, this.frameTimes.length);
+    const elapsed = now - this.lastSampleTime;
+    const frameDelta = this.engine.time.frame - this.lastSampleFrame;
+    const fps = elapsed > 0 ? Math.round(frameDelta * 1000 / elapsed) : 0;
+    this.lastSampleTime = now;
+    this.lastSampleFrame = this.engine.time.frame;
     const player = this.getPlayer();
     const body = player?.getComponent(RigidBody);
     const colliders = this.engine.entities.getAll().flatMap(entity =>
       [...entity.components.values()].filter(component => component instanceof Collider && component.enabled)
     );
     const fmt = value => Number.isFinite(value) ? value.toFixed(1) : "—";
-    this.panel.querySelector("#debug-fps").textContent = `${Math.round(1000 / Math.max(1, average))} FPS`;
+    this.panel.querySelector("#debug-fps").textContent = `${fps} FPS`;
     this.panel.querySelector("#debug-engine-state").textContent = this.engine.running ? "Motor activo" : "Motor pausado";
     this.panel.querySelector("#debug-position").textContent = player ? `${fmt(player.transform.position.x)} / ${fmt(player.transform.position.y)}` : "No encontrado";
     this.panel.querySelector("#debug-velocity").textContent = body ? `${fmt(body.velocity.x)} / ${fmt(body.velocity.y)}` : "—";
