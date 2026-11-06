@@ -1,5 +1,6 @@
 export class Time {
-  constructor() {
+  constructor({ maxDelta = 0.05 } = {}) {
+    this.maxDelta = Math.max(0, Number(maxDelta) || 0);
     this.elapsed = 0;
     this.delta = 0;
     this.frame = 0;
@@ -12,7 +13,7 @@ export class Time {
     if (this.#lastTimestamp === null) {
       this.delta = 0;
     } else {
-      this.delta = Math.min((timestamp - this.#lastTimestamp) / 1000, 0.05);
+      this.delta = Math.min(Math.max(0, (timestamp - this.#lastTimestamp) / 1000), this.maxDelta);
     }
     this.#lastTimestamp = timestamp;
     this.elapsed += this.delta;

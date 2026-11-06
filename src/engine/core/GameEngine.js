@@ -7,14 +7,15 @@ import { InputManager } from "../input/InputManager.js";
 import { Camera2D } from "../world/Camera2D.js";
 import { SceneManager } from "../scenes/SceneManager.js";
 import { EntityManager } from "../entities/EntityManager.js";
+import { PhysicsWorld } from "../physics/PhysicsWorld.js";
 
 export class GameEngine {
-  static VERSION = "0.3.1";
+  static VERSION = "0.4.0";
   constructor({ canvas, config = {} }) {
-    this.events = new EventBus();
-    this.time = new Time();
-    this.services = new ServiceContainer();
     this.config = { maxDelta: 0.05, ...config };
+    this.events = new EventBus();
+    this.time = new Time({ maxDelta: this.config.maxDelta });
+    this.services = new ServiceContainer();
     this.context = new GameContext({
       services: this.services, events: this.events, time: this.time, config: this.config
     });
@@ -23,6 +24,7 @@ export class GameEngine {
     this.camera = this.services.register("camera", new Camera2D());
     this.entities = this.services.register("entities", new EntityManager(this.context));
     this.scenes = this.services.register("scenes", new SceneManager(this.context));
+    this.physics = this.services.register("physics", new PhysicsWorld(this.context));
     this.running = false;
     this.frameRequest = null;
     this.boundFrame = timestamp => this.#frame(timestamp);
@@ -41,6 +43,7 @@ export class GameEngine {
     this.camera.setViewport(this.renderer.width, this.renderer.height);
     this.camera.update(delta);
     this.entities.update(delta);
+    this.physics.update();
     this.scenes.update(delta);
     this.events.emit("engine:update", this.context);
     this.renderer.render(this.context);

@@ -29,6 +29,7 @@ export class EntityManager {
     return true;
   }
   get(id) { return this.entities.get(id) ?? null; }
+  getAll() { return [...this.entities.values()]; }
   findByName(name) { return [...this.entities.values()].find(entity => entity.name === name) ?? null; }
   update(delta) {
     this.updating = true;
