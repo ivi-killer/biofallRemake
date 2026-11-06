@@ -6,9 +6,10 @@ import { Renderer } from "../rendering/Renderer.js";
 import { InputManager } from "../input/InputManager.js";
 import { Camera2D } from "../world/Camera2D.js";
 import { SceneManager } from "../scenes/SceneManager.js";
+import { EntityManager } from "../entities/EntityManager.js";
 
 export class GameEngine {
-  static VERSION = "0.2.0";
+  static VERSION = "0.3.0";
 
   constructor({ canvas, config = {} }) {
     this.events = new EventBus();
@@ -24,6 +25,7 @@ export class GameEngine {
     this.renderer = this.services.register("renderer", new Renderer(canvas));
     this.input = this.services.register("input", new InputManager(window));
     this.camera = this.services.register("camera", new Camera2D());
+    this.entities = this.services.register("entities", new EntityManager(this.context));
     this.scenes = this.services.register("scenes", new SceneManager(this.context));
     this.running = false;
     this.frameRequest = null;
@@ -44,9 +46,11 @@ export class GameEngine {
     const { delta } = this.time;
     this.camera.setViewport(this.renderer.width, this.renderer.height);
     this.camera.update(delta);
+    this.entities.update(delta);
     this.scenes.update(delta);
     this.events.emit("engine:update", this.context);
     this.renderer.render(this.context);
+    this.entities.render(this.renderer.context);
     this.scenes.render(this.renderer.context, this.camera);
     this.events.emit("engine:render", this.context);
     this.input.endFrame();
