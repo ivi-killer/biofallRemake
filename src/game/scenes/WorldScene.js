@@ -19,7 +19,6 @@ export class WorldScene extends Scene {
     const entities = this.context.services.get("entities");
     const player = new Entity("Player");
     player.transform.position.set(0, 0);
-    // Match the collider to the circular body drawn by PlayerVisual.
     player.addComponent(new CircleCollider({ radius: 12.4 }));
     player.addComponent(new PlayerController({
       speed: 220,
@@ -95,12 +94,14 @@ export class WorldScene extends Scene {
         for (const object of stage.objects) {
           let collider = null;
           if (["tree", "pine", "deadTree"].includes(object.kind)) {
-            // Tree collision follows the visible central trunk, not the canopy.
+            // The canopy is decorative; collision follows the outlined trunk.
             collider = new CircleCollider({ radius: 8.9 * object.scale });
           } else if (object.kind === "rock") {
-            collider = new BoxCollider({ width: 34 * object.scale, height: 26 * object.scale });
+            // Matches the rock's outer silhouette including its outline.
+            collider = new BoxCollider({ width: 37 * object.scale, height: 31 * object.scale });
           } else if (object.kind === "ruin") {
-            collider = new BoxCollider({ width: 36 * object.scale, height: 29 * object.scale });
+            // Matches the ruin's outer footprint.
+            collider = new BoxCollider({ width: 39 * object.scale, height: 29 * object.scale });
           }
 
           if (collider) {
@@ -137,17 +138,13 @@ export class WorldScene extends Scene {
       for (let y = minY; y < maxY; y += size) {
         const stage = getStage(Math.floor(x / size), Math.floor(y / size));
         const palette = ART_STYLE.palette[stage.biome] ?? ART_STYLE.palette.forest;
-
-        // Flat biome base; small controlled marks replace the old noisy patches.
         context.fillStyle = palette.ground;
         context.fillRect(stage.x, stage.y, size, size);
         drawGroundDetails(context, stage, palette);
-
         for (const object of stage.objects) drawWorldObject(context, object);
       }
     }
 
-    // World boundary uses the same dark outline language as the assets.
     context.strokeStyle = ART_STYLE.groundOutline;
     context.lineWidth = 4;
     context.strokeRect(-WORLD_CONFIG.halfSize, -WORLD_CONFIG.halfSize,
@@ -157,11 +154,9 @@ export class WorldScene extends Scene {
   onExit() {
     const entities = this.context.services.get("entities");
     if (this.player) entities.remove(this.player);
-
     for (const list of this.activeStages.values()) {
       for (const entity of list) entities.remove(entity);
     }
-
     this.activeStages.clear();
     this.player = null;
     this.loadedStageCenter = null;
