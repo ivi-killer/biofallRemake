@@ -1,4 +1,5 @@
 import { Collider } from "./Collider.js";
+import { RigidBody } from "./RigidBody.js";
 import { detectCollision } from "./Collision.js";
 
 export class PhysicsWorld {
@@ -32,6 +33,7 @@ export class PhysicsWorld {
         const key = a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
         const pair = { a, b, contact: { ...contact, isTrigger: a.isTrigger || b.isTrigger } };
         currentPairs.set(key, pair);
+        if (!pair.contact.isTrigger) this.#resolve(pair);
         this.#dispatch(this.previousPairs.has(key) ? "stay" : "enter", pair);
       }
     }
@@ -40,6 +42,46 @@ export class PhysicsWorld {
       if (!currentPairs.has(key)) this.#dispatch("exit", pair);
     }
     this.previousPairs = currentPairs;
+  }
+
+  #resolve({ a, b, contact }) {
+    const bodyA = a.entity.getComponent(RigidBody);
+    const bodyB = b.entity.getComponent(RigidBody);
+    const inverseA = bodyA?.inverseMass ?? 0;
+    const inverseB = bodyB?.inverseMass ?? 0;
+    const inverseTotal = inverseA + inverseB;
+    if (inverseTotal <= 0) return;
+
+    const normal = contact.normal;
+    const correction = Math.max(contact.penetration - 0.001, 0) / inverseTotal;
+    if (inverseA > 0) {
+      a.entity.transform.position.x -= normal.x * correction * inverseA;
+      a.entity.transform.position.y -= normal.y * correction * inverseA;
+    }
+    if (inverseB > 0) {
+      b.entity.transform.position.x += normal.x * correction * inverseB;
+      b.entity.transform.position.y += normal.y * correction * inverseB;
+    }
+
+    const velocityA = bodyA?.velocity ?? { x: 0, y: 0 };
+    const velocityB = bodyB?.velocity ?? { x: 0, y: 0 };
+    const relativeX = velocityB.x - velocityA.x;
+    const relativeY = velocityB.y - velocityA.y;
+    const velocityAlongNormal = relativeX * normal.x + relativeY * normal.y;
+    if (velocityAlongNormal >= 0) return;
+
+    const restitution = Math.min(bodyA?.restitution ?? 0, bodyB?.restitution ?? 0);
+    const impulseMagnitude = -(1 + restitution) * velocityAlongNormal / inverseTotal;
+    const impulseX = impulseMagnitude * normal.x;
+    const impulseY = impulseMagnitude * normal.y;
+    if (bodyA) {
+      bodyA.velocity.x -= impulseX * inverseA;
+      bodyA.velocity.y -= impulseY * inverseA;
+    }
+    if (bodyB) {
+      bodyB.velocity.x += impulseX * inverseB;
+      bodyB.velocity.y += impulseY * inverseB;
+    }
   }
 
   #dispatch(phase, pair) {

@@ -10,7 +10,7 @@ import { EntityManager } from "../entities/EntityManager.js";
 import { PhysicsWorld } from "../physics/PhysicsWorld.js";
 
 export class GameEngine {
-  static VERSION = "0.4.0";
+  static VERSION = "0.5.0";
   constructor({ canvas, config = {} }) {
     this.config = { maxDelta: 0.05, ...config };
     this.events = new EventBus();
@@ -47,8 +47,8 @@ export class GameEngine {
     this.scenes.update(delta);
     this.events.emit("engine:update", this.context);
     this.renderer.render(this.context);
-    this.entities.render(this.renderer.context, this.camera);
     this.scenes.render(this.renderer.context, this.camera);
+    this.entities.render(this.renderer.context, this.camera);
     this.events.emit("engine:render", this.context);
     this.input.endFrame();
     this.frameRequest = requestAnimationFrame(this.boundFrame);

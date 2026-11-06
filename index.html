@@ -11,13 +11,12 @@
 <body>
   <main id="app" class="app-shell">
     <canvas id="game-canvas" aria-label="Área de juego de BioFall"></canvas>
-    <section class="boot-panel" aria-live="polite">
-      <p class="eyebrow">BIOFALL PROJECT</p>
-      <h1>BioFall</h1>
-      <p class="boot-message" id="boot-message">Inicializando el motor...</p>
-      <span class="engine-version" id="engine-version">ENGINE 0.1.0</span>
+    <section class="game-hud" aria-live="polite">
+      <div class="brand">BIOFALL <span>PROTOTYPE</span></div>
+      <p class="boot-message" id="boot-message">Preparando el mundo...</p>
+      <span class="engine-version" id="engine-version">ENGINE 0.5.0</span>
     </section>
-    <p class="corner-note">SURVIVE · ADAPT · DESCEND</p>
+    <p class="corner-note">WASD / FLECHAS · MOVERSE</p>
   </main>
   <script type="module" src="./src/main.js"></script>
 </body>
