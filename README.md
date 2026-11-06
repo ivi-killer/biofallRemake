@@ -4,15 +4,15 @@ BioFall es un roguelike de supervivencia 2D con perspectiva top-down, desarrolla
 
 ## Estado actual
 
-**Fundación técnica — etapa inicial.** El proyecto contiene una base modular de motor, ciclo de vida, eventos, tiempo, servicios y renderizado Canvas 2D. Todavía no representa una versión jugable.
+**Fundación del motor — versión 0.2.0.** La base modular incluye ciclo de vida, eventos, tiempo, servicios, renderizado Canvas 2D, matemáticas 2D, entrada multiplataforma, cámara y gestión de escenas. Todavía no representa una versión jugable.
 
-## Principios del proyecto
+## Principios
 
 - JavaScript moderno con ES Modules y plataforma web estándar.
-- Arquitectura modular, escalable y sin dependencias globales innecesarias.
-- Interfaz adaptable a pantallas de escritorio y móviles.
-- Estilo visual minimalista, legible y fluido, con identidad propia.
-- Sistemas de juego desacoplados para facilitar su ampliación y pruebas.
+- Arquitectura modular, escalable y con responsabilidades separadas.
+- Adaptación a escritorio y móviles.
+- Estilo visual minimalista, legible y con identidad propia.
+- Sistemas desacoplados para facilitar ampliación y pruebas.
 
 ## Estructura
 
@@ -20,15 +20,12 @@ BioFall es un roguelike de supervivencia 2D con perspectiva top-down, desarrolla
 src/
   engine/
     core/
-      EventBus.js
-      GameContext.js
-      GameEngine.js
-      ServiceContainer.js
-      Time.js
+    input/
+    math/
     rendering/
-      Renderer.js
+    scenes/
+    world/
   game/
-    createGame.js
   main.js
 index.html
 style.css
@@ -36,6 +33,6 @@ style.css
 
 ## Desarrollo
 
-La aplicación se publica mediante GitHub Pages. La entrada del proyecto es `index.html` y el motor se carga como módulo ES desde `src/main.js`.
+La aplicación se publica mediante GitHub Pages. La entrada es `index.html` y el motor se carga como módulo ES desde `src/main.js`.
 
 Cada sistema se incorporará por etapas, verificando que la base funcional siga iniciando correctamente.

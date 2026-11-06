@@ -3,9 +3,12 @@ import { Time } from "./Time.js";
 import { ServiceContainer } from "./ServiceContainer.js";
 import { GameContext } from "./GameContext.js";
 import { Renderer } from "../rendering/Renderer.js";
+import { InputManager } from "../input/InputManager.js";
+import { Camera2D } from "../world/Camera2D.js";
+import { SceneManager } from "../scenes/SceneManager.js";
 
 export class GameEngine {
-  static VERSION = "0.1.0";
+  static VERSION = "0.2.0";
 
   constructor({ canvas, config = {} }) {
     this.events = new EventBus();
@@ -19,9 +22,12 @@ export class GameEngine {
       config: this.config
     });
     this.renderer = this.services.register("renderer", new Renderer(canvas));
+    this.input = this.services.register("input", new InputManager(window));
+    this.camera = this.services.register("camera", new Camera2D());
+    this.scenes = this.services.register("scenes", new SceneManager(this.context));
     this.running = false;
     this.frameRequest = null;
-    this.boundFrame = (timestamp) => this.#frame(timestamp);
+    this.boundFrame = timestamp => this.#frame(timestamp);
   }
 
   async start() {
@@ -35,9 +41,15 @@ export class GameEngine {
   #frame(timestamp) {
     if (!this.running) return;
     this.time.update(timestamp);
+    const { delta } = this.time;
+    this.camera.setViewport(this.renderer.width, this.renderer.height);
+    this.camera.update(delta);
+    this.scenes.update(delta);
     this.events.emit("engine:update", this.context);
     this.renderer.render(this.context);
+    this.scenes.render(this.renderer.context, this.camera);
     this.events.emit("engine:render", this.context);
+    this.input.endFrame();
     this.frameRequest = requestAnimationFrame(this.boundFrame);
   }
 
