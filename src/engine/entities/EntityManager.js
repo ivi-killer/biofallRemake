@@ -6,7 +6,6 @@ export class EntityManager {
     this.pendingRemove = new Set();
     this.updating = false;
   }
-
   add(entity) {
     if (!entity?.id) throw new TypeError("Entidad no válida.");
     if (this.entities.has(entity.id) || this.pendingAdd.some(item => item.id === entity.id)) {
@@ -17,7 +16,6 @@ export class EntityManager {
     else this.entities.set(entity.id, entity);
     return entity;
   }
-
   remove(entityOrId) {
     const id = typeof entityOrId === "number" ? entityOrId : entityOrId?.id;
     if (!this.entities.has(id) && !this.pendingAdd.some(item => item.id === id)) return false;
@@ -30,36 +28,36 @@ export class EntityManager {
     }
     return true;
   }
-
   get(id) { return this.entities.get(id) ?? null; }
   findByName(name) { return [...this.entities.values()].find(entity => entity.name === name) ?? null; }
-
   update(delta) {
     this.updating = true;
     try {
       for (const entity of this.entities.values()) {
-        if (this.pendingRemove.has(entity.id)) continue;
-        entity.update(delta);
+        if (!this.pendingRemove.has(entity.id)) entity.update(delta);
       }
     } finally {
       this.updating = false;
       for (const id of this.pendingRemove) {
-        const entity = this.entities.get(id);
+        const entity = this.entities.get(id) ?? this.pendingAdd.find(item => item.id === id);
         this.entities.delete(id);
         entity?.destroy();
       }
       this.pendingRemove.clear();
-      for (const entity of this.pendingAdd) this.entities.set(entity.id, entity);
+      for (const entity of this.pendingAdd) {
+        if (!this.entities.has(entity.id)) this.entities.set(entity.id, entity);
+      }
       this.pendingAdd.length = 0;
     }
   }
-
-  render(context) {
+  render(context, camera = null) {
+    context.save();
+    if (camera) camera.applyTransform(context);
     for (const entity of this.entities.values()) {
       if (!this.pendingRemove.has(entity.id)) entity.render(context);
     }
+    context.restore();
   }
-
   clear() {
     for (const entity of this.entities.values()) entity.destroy();
     for (const entity of this.pendingAdd) entity.destroy();
@@ -67,6 +65,5 @@ export class EntityManager {
     this.pendingAdd.length = 0;
     this.pendingRemove.clear();
   }
-
   destroy() { this.clear(); }
 }

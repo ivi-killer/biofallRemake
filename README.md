@@ -4,7 +4,7 @@ BioFall es un roguelike de supervivencia 2D con perspectiva top-down, desarrolla
 
 ## Estado actual
 
-**Fundación del motor — versión 0.3.0.** La base modular incluye ciclo de vida, eventos, tiempo, servicios, renderizado Canvas 2D, matemáticas 2D, entrada multiplataforma, cámara, escenas y una arquitectura inicial de entidades y componentes. Todavía no representa una versión jugable.
+**Fundación del motor — versión 0.3.1.** La base modular incluye ciclo de vida, eventos, tiempo, servicios, renderizado Canvas 2D, matemáticas 2D, entrada multiplataforma, cámara, escenas y arquitectura de entidades/componentes. Las entidades se renderizan en coordenadas del mundo y su registro permite altas y bajas seguras durante la actualización. Todavía no representa una versión jugable.
 
 ## Principios
 
