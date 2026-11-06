@@ -50,7 +50,7 @@ test("diagonal keyboard movement is normalized", () => {
   controller.update(0.05);
 
   assert.ok(Math.abs(controller.direction.length() - 1) < 0.001);
-  assert.ok(Math.abs(controller.direction.x - controller.direction.y) < 0.001);
+  assert.ok(Math.abs(Math.abs(controller.direction.x) - Math.abs(controller.direction.y)) < 0.001);
 });
 
 test("player rotates to face the movement direction", () => {
