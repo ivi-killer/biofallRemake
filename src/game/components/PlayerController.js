@@ -17,12 +17,17 @@ export class PlayerController extends Component {
 
     let x = 0;
     let y = 0;
-    if (input.isKeyDown("KeyA") || input.isKeyDown("ArrowLeft")) x -= 1;
-    if (input.isKeyDown("KeyD") || input.isKeyDown("ArrowRight")) x += 1;
-    if (input.isKeyDown("KeyW") || input.isKeyDown("ArrowUp")) y -= 1;
-    if (input.isKeyDown("KeyS") || input.isKeyDown("ArrowDown")) y += 1;
+    if (input.virtualJoystick.active) {
+      x = input.virtualJoystick.x;
+      y = input.virtualJoystick.y;
+    } else {
+      if (input.isKeyDown("KeyA") || input.isKeyDown("ArrowLeft")) x -= 1;
+      if (input.isKeyDown("KeyD") || input.isKeyDown("ArrowRight")) x += 1;
+      if (input.isKeyDown("KeyW") || input.isKeyDown("ArrowUp")) y -= 1;
+      if (input.isKeyDown("KeyS") || input.isKeyDown("ArrowDown")) y += 1;
+    }
 
-    if (x === 0 && y === 0 && input.pointer.down) {
+    if (x === 0 && y === 0 && !input.virtualJoystick.active && input.pointer.down) {
       const camera = this.context.services.get("camera");
       const target = camera.screenToWorld(input.pointer);
       x = target.x - this.entity.transform.position.x;

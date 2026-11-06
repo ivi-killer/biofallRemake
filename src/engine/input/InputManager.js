@@ -10,6 +10,7 @@ export class InputManager {
     this.keysReleased = new Set();
     this.pointer = { x: 0, y: 0, down: false, pressed: false, released: false, button: -1 };
     this.pointerInside = false;
+    this.virtualJoystick = { x: 0, y: 0, active: false };
     this.boundHandlers = {
       keydown: event => this.#onKeyDown(event),
       keyup: event => this.#onKeyUp(event),
@@ -83,6 +84,9 @@ export class InputManager {
     this.pointer.pressed = false;
     this.pointer.released = false;
     this.pointer.button = -1;
+    this.virtualJoystick.x = 0;
+    this.virtualJoystick.y = 0;
+    this.virtualJoystick.active = false;
   }
 
   destroy() {
