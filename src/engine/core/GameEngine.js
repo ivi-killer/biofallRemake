@@ -11,7 +11,7 @@ import { PhysicsWorld } from "../physics/PhysicsWorld.js";
 import { Collider } from "../physics/Collider.js";
 
 export class GameEngine {
-  static VERSION = "0.6.0";
+  static VERSION = "0.6.1";
   constructor({ canvas, config = {} }) {
     this.config = { maxDelta: 0.05, ...config };
     this.events = new EventBus();
@@ -23,10 +23,11 @@ export class GameEngine {
     this.renderer = this.services.register("renderer", new Renderer(canvas));
     this.input = this.services.register("input", new InputManager(window));
     this.camera = this.services.register("camera", new Camera2D({
+      zoom: 1.25,
       smoothing: 8,
       lookAhead: 0.15,
       maxLookAhead: 42,
-      dynamicZoom: 0.045,
+      dynamicZoom: 0.025,
       zoomSmoothing: 5
     }));
     this.entities = this.services.register("entities", new EntityManager(this.context));

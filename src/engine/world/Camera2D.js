@@ -6,11 +6,11 @@ export class Camera2D {
   constructor({
     x = 0,
     y = 0,
-    zoom = 1,
+    zoom = 1.25,
     smoothing = 8,
     lookAhead = 0.15,
     maxLookAhead = 42,
-    dynamicZoom = 0.045,
+    dynamicZoom = 0.025,
     zoomSmoothing = 5
   } = {}) {
     this.position = new Vector2(x, y);
@@ -69,8 +69,9 @@ export class Camera2D {
     this.position.x = MathUtils.lerp(this.position.x, destinationX, positionBlend);
     this.position.y = MathUtils.lerp(this.position.y, destinationY, positionBlend);
 
+    // Keep the player prominent while allowing only a subtle speed-based pullback.
     const speedRatio = Math.min(speed / 230, 1);
-    const targetZoom = Math.max(0.1, this.baseZoom - this.dynamicZoom * speedRatio);
+    const targetZoom = Math.max(this.baseZoom * 0.94, this.baseZoom - this.dynamicZoom * speedRatio);
     const zoomBlend = this.zoomSmoothing <= 0
       ? 1
       : 1 - Math.exp(-this.zoomSmoothing * frameDelta);

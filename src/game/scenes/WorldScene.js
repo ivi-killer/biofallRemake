@@ -17,35 +17,54 @@ function drawTree(context, x, y, scale = 1, dead = false) {
   context.save();
   context.translate(x, y);
   context.scale(scale, scale);
-  context.fillStyle = "rgba(37, 57, 34, .2)";
+
+  // True top-down silhouette: round shadow, circular canopy and visible trunk.
+  context.fillStyle = "rgba(27, 43, 25, .25)";
   context.beginPath();
-  context.ellipse(4, 10, 22, 13, 0, 0, Math.PI * 2);
+  context.ellipse(3, 5, 24, 21, 0, 0, Math.PI * 2);
   context.fill();
-  context.fillStyle = dead ? "#66513d" : "#765438";
-  context.fillRect(-5, -3, 10, 24);
-  context.strokeStyle = dead ? "#514638" : "#24482d";
+
+  context.fillStyle = dead ? "#8a7457" : "#315c36";
+  context.strokeStyle = dead ? "#5f4b37" : "#24482d";
   context.lineWidth = 2;
-  context.fillStyle = dead ? "#74604a" : "#315c36";
   context.beginPath();
-  if (dead) {
-    context.moveTo(0, -30); context.lineTo(-13, -10); context.lineTo(-8, 1);
-    context.lineTo(0, -12); context.lineTo(12, 1); context.lineTo(8, -13);
-    context.closePath();
-  } else {
-    context.arc(0, -7, 20, 0, Math.PI * 2);
-  }
+  context.arc(0, 0, dead ? 17 : 21, 0, Math.PI * 2);
   context.fill();
   context.stroke();
+
   if (!dead) {
     context.fillStyle = "#477d43";
     context.beginPath();
-    context.arc(-7, -13, 10, 0, Math.PI * 2);
-    context.arc(8, -10, 9, 0, Math.PI * 2);
+    context.arc(-7, -7, 11, 0, Math.PI * 2);
+    context.arc(8, -5, 10, 0, Math.PI * 2);
+    context.arc(3, 9, 9, 0, Math.PI * 2);
     context.fill();
+
+    context.fillStyle = "rgba(177, 210, 119, .28)";
+    context.beginPath();
+    context.arc(-7, -8, 5, 0, Math.PI * 2);
+    context.arc(7, -5, 4, 0, Math.PI * 2);
+    context.fill();
+  } else {
+    context.strokeStyle = "#b09a76";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(-8, -5); context.lineTo(8, 6);
+    context.moveTo(7, -8); context.lineTo(-6, 8);
+    context.stroke();
   }
+
+  // Small circular trunk remains visible above the canopy.
+  context.fillStyle = dead ? "#70563d" : "#765238";
+  context.strokeStyle = dead ? "#493d30" : "#503b2c";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.arc(0, 0, dead ? 10 : 9, 0, Math.PI * 2);
+  context.fill();
+  context.stroke();
+
   context.restore();
 }
-
 function drawRock(context, x, y, scale = 1) {
   context.save();
   context.translate(x, y);
@@ -212,7 +231,7 @@ export class WorldScene extends Scene {
         for (const object of stage.objects) {
           let collider = null;
           if (["tree", "pine", "deadTree"].includes(object.kind)) {
-            collider = new CircleCollider({ radius: 12 * object.scale });
+            collider = new CircleCollider({ radius: 9 * object.scale });
           } else if (object.kind === "rock") {
             collider = new BoxCollider({ width: 25 * object.scale, height: 19 * object.scale });
           } else if (object.kind === "ruin") {
