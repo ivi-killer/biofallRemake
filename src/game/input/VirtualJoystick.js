@@ -1,4 +1,4 @@
-import { clamp } from "../../engine/math/MathUtils.js";
+import { MathUtils } from "../../engine/math/MathUtils.js";
 
 export class VirtualJoystick {
   constructor({ element, input, deadZone = 0.14 } = {}) {
@@ -6,7 +6,7 @@ export class VirtualJoystick {
     this.element = element;
     this.knob = element.querySelector("#joystick-knob");
     this.input = input;
-    this.deadZone = clamp(deadZone, 0, 0.5);
+    this.deadZone = MathUtils.clamp(deadZone, 0, 0.5);
     this.pointerId = null;
     this.bound = {
       down: event => this.onPointerDown(event),
