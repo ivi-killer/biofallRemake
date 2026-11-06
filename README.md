@@ -28,3 +28,7 @@ El proyecto utiliza módulos JavaScript nativos y Canvas 2D, sin dependencias de
 ## Pruebas
 
 Ejecutar el comando npm test para comprobar el motor, la física, la cámara, el movimiento del jugador y la generación del mundo.
+
+## Créditos de recursos
+
+Los primeros sprites integrados proceden del repositorio público [survival2d/Assets](https://github.com/survival2d/Assets), archivo de recursos de surviv.io Creator Kit. BioFall es un proyecto fanmade independiente y no oficial.
