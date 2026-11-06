@@ -4,6 +4,7 @@ import {
   ART_STYLE, drawTree, drawRock, drawBush, drawCactus, drawRuin,
   drawWorldObject, drawGroundDetails
 } from "../src/game/rendering/WorldAssets.js";
+import { CREATOR_KIT_SPRITES } from "../src/game/rendering/CreatorKitAssets.js";
 
 function createContext() {
   return new Proxy({}, {
@@ -47,4 +48,9 @@ test("all world assets render through the shared Canvas 2D context", () => {
     for (const object of objects) drawWorldObject(ctx, object);
     drawGroundDetails(ctx, { x: 0, y: 0, size: 320, cx: 0, cy: 0 }, ART_STYLE.palette.forest);
   });
+});
+
+
+test("Creator Kit local sprite registry covers the first integrated world objects", () => {
+  assert.deepEqual([...CREATOR_KIT_SPRITES].sort(), ["bush", "rock", "tree"]);
 });
