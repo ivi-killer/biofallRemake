@@ -14,6 +14,7 @@ export class InputManager {
     };
     this.pointerInside = false;
     this.virtualJoystick = { x: 0, y: 0, active: false };
+    this.aimJoystick = { x: 0, y: 0, active: false };
     this.boundHandlers = {
       keydown: event => this.#onKeyDown(event),
       keyup: event => this.#onKeyUp(event),
@@ -89,9 +90,11 @@ export class InputManager {
     this.pointer.pressed = false;
     this.pointer.released = false;
     this.pointer.button = -1;
-    this.virtualJoystick.x = 0;
-    this.virtualJoystick.y = 0;
-    this.virtualJoystick.active = false;
+    for (const stick of [this.virtualJoystick, this.aimJoystick]) {
+      stick.x = 0;
+      stick.y = 0;
+      stick.active = false;
+    }
   }
 
   destroy() {
