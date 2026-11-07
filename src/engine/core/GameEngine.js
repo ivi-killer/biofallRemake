@@ -11,7 +11,7 @@ import { PhysicsWorld } from "../physics/PhysicsWorld.js";
 import { Collider } from "../physics/Collider.js";
 
 export class GameEngine {
-  static VERSION = "0.7.0";
+  static VERSION = "0.8.0";
   constructor({ canvas, config = {} }) {
     this.config = { maxDelta: 0.05, ...config };
     this.events = new EventBus();
@@ -24,11 +24,11 @@ export class GameEngine {
     this.input = this.services.register("input", new InputManager(window));
     this.camera = this.services.register("camera", new Camera2D({
       zoom: 1.25,
-      smoothing: 8,
-      lookAhead: 0.15,
-      maxLookAhead: 42,
-      dynamicZoom: 0.025,
-      zoomSmoothing: 5
+      smoothing: 0,
+      lookAhead: 0,
+      maxLookAhead: 0,
+      dynamicZoom: 0,
+      zoomSmoothing: 0
     }));
     this.entities = this.services.register("entities", new EntityManager(this.context));
     this.scenes = this.services.register("scenes", new SceneManager(this.context));
@@ -50,11 +50,12 @@ export class GameEngine {
     this.time.update(timestamp);
     const { delta } = this.time;
     this.camera.setViewport(this.renderer.width, this.renderer.height);
-    this.camera.update(delta);
     this.entities.update(delta);
     this.physics.update();
     this.scenes.update(delta);
     this.events.emit("engine:update", this.context);
+    // Follow the final simulated position, after movement and collision resolution.
+    this.camera.update(delta);
     this.renderer.render(this.context);
     this.scenes.render(this.renderer.context, this.camera);
     this.entities.render(this.renderer.context, this.camera);
