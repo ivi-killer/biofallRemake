@@ -11,7 +11,7 @@ import { PhysicsWorld } from "../physics/PhysicsWorld.js";
 import { Collider } from "../physics/Collider.js";
 
 export class GameEngine {
-  static VERSION = "0.8.0";
+  static VERSION = "0.8.1";
   constructor({ canvas, config = {} }) {
     this.config = { maxDelta: 0.05, ...config };
     this.events = new EventBus();
