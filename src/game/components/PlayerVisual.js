@@ -79,7 +79,7 @@ export class PlayerVisual extends Component {
     context.fillStyle = "#f5f1df";
     context.fill();
 
-    // Eyes sit toward local -Y; the entity rotation turns them toward movement.
+    // Eyes sit toward local -Y; the entity rotation turns them toward the current aim direction.
     context.fillStyle = "#171914";
     context.beginPath();
     context.arc(-4.1, -3.5, 1.7, 0, Math.PI * 2);
