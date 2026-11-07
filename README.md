@@ -5,8 +5,9 @@ BioFall es un roguelike de supervivencia 2D con perspectiva cenital (top-down), 
 ## Prototipo actual
 
 - Personaje circular con dos manos visibles, ojos y una animación ligera al desplazarse.
-- Movimiento con aceleración, frenado controlado y orientación hacia la dirección de avance.
-- Cámara con seguimiento suavizado, anticipación de movimiento y zoom dinámico sutil.
+- Movimiento inmediato en terreno normal, con diagonales normalizadas y parada al soltar el control.
+- Orientación independiente del movimiento mediante el ratón en PC.
+- Cámara centrada en el jugador, con encuadre y zoom estables.
 - Mundo finito dividido en etapas de 320 × 320 unidades.
 - Generación determinista y cacheada de etapas; los colisionadores se cargan alrededor del jugador y se retiran al alejarse.
 - Controles de teclado en PC y joystick virtual en dispositivos táctiles.
@@ -19,8 +20,9 @@ BioFall es un roguelike de supervivencia 2D con perspectiva cenital (top-down), 
 
 ## Controles
 
-- **WASD / flechas:** movimiento.
-- **Joystick virtual:** movimiento en móviles.
+- **WASD / flechas:** movimiento en PC.
+- **Ratón:** orientar al personaje independientemente del movimiento.
+- **Joystick virtual:** movimiento en móviles; la orientación sigue la dirección de desplazamiento por ahora.
 - **DEV / F2:** herramientas internas de depuración.
 
 El proyecto utiliza módulos JavaScript nativos y Canvas 2D, sin dependencias de ejecución externas.
