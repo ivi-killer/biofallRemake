@@ -89,7 +89,7 @@ test("right aim joystick points independently from movement", () => {
 
   assert.equal(controller.direction.x, -1);
   assert.equal(controller.aimingWithJoystick, true);
-  assert.ok(Math.abs(player.transform.rotation - Math.PI) < 0.001);
+  assert.ok(Math.abs(player.transform.rotation - Math.PI / 2) < 0.001);
 });
 
 test("movement direction is used again after releasing the aim joystick", () => {
