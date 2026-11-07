@@ -1,11 +1,15 @@
 import { MathUtils } from "../../engine/math/MathUtils.js";
 
 export class VirtualJoystick {
-  constructor({ element, input, deadZone = 0.14 } = {}) {
+  constructor({ element, input, stateKey = "virtualJoystick", knobSelector = "#joystick-knob", deadZone = 0.14 } = {}) {
     if (!element || !input) throw new TypeError("VirtualJoystick necesita un elemento e InputManager.");
+    const state = input[stateKey];
+    if (!state) throw new TypeError(`InputManager no contiene el estado ${stateKey}.`);
     this.element = element;
-    this.knob = element.querySelector("#joystick-knob");
+    this.knob = element.querySelector(knobSelector);
+    if (!this.knob) throw new TypeError(`No se encontró el control ${knobSelector}.`);
     this.input = input;
+    this.state = state;
     this.deadZone = MathUtils.clamp(deadZone, 0, 0.5);
     this.pointerId = null;
     this.bound = {
@@ -28,7 +32,7 @@ export class VirtualJoystick {
     event.stopPropagation();
     this.pointerId = event.pointerId;
     this.element.setPointerCapture(event.pointerId);
-    this.input.virtualJoystick.active = true;
+    this.state.active = true;
     this.update(event);
   }
 
@@ -50,8 +54,8 @@ export class VirtualJoystick {
     const strength = normalized <= this.deadZone ? 0 : (normalized - this.deadZone) / (1 - this.deadZone);
     const angleX = distance > 0 ? dx / distance : 0;
     const angleY = distance > 0 ? dy / distance : 0;
-    this.input.virtualJoystick.x = angleX * strength;
-    this.input.virtualJoystick.y = angleY * strength;
+    this.state.x = angleX * strength;
+    this.state.y = angleY * strength;
     const knobX = angleX * Math.min(distance, maxTravel);
     const knobY = angleY * Math.min(distance, maxTravel);
     this.knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
@@ -69,9 +73,9 @@ export class VirtualJoystick {
       this.element.releasePointerCapture(this.pointerId);
     }
     this.pointerId = null;
-    this.input.virtualJoystick.x = 0;
-    this.input.virtualJoystick.y = 0;
-    this.input.virtualJoystick.active = false;
+    this.state.x = 0;
+    this.state.y = 0;
+    this.state.active = false;
     this.knob.style.transform = "translate(-50%, -50%)";
   }
 
