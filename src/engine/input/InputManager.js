@@ -8,7 +8,10 @@ export class InputManager {
     this.keysDown = new Set();
     this.keysPressed = new Set();
     this.keysReleased = new Set();
-    this.pointer = { x: 0, y: 0, down: false, pressed: false, released: false, button: -1 };
+    this.pointer = {
+      x: 0, y: 0, down: false, pressed: false, released: false,
+      button: -1, type: "mouse", moved: false
+    };
     this.pointerInside = false;
     this.virtualJoystick = { x: 0, y: 0, active: false };
     this.boundHandlers = {
@@ -47,6 +50,8 @@ export class InputManager {
   #onPointerMove(event) {
     this.pointer.x = event.clientX;
     this.pointer.y = event.clientY;
+    this.pointer.type = event.pointerType || this.pointer.type;
+    this.pointer.moved = true;
   }
 
   #onPointerDown(event) {
