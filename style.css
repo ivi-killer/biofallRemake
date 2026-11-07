@@ -73,3 +73,9 @@ button { cursor: pointer; }
   .virtual-joystick { display: block; }
   .corner-note { bottom: max(12px, env(safe-area-inset-bottom)); left: 50%; width: auto; transform: translateX(-50%); white-space: nowrap; padding: 5px 8px; border-radius: 5px; background: rgba(15,21,17,.52); }
 }
+
+/* Dual touch controls: movement on the left, independent aiming on the right. */
+@media (pointer: coarse) {
+  .move-joystick { left: max(22px, env(safe-area-inset-left)); right: auto; }
+  .aim-joystick { left: auto; right: max(22px, env(safe-area-inset-right)); }
+}
