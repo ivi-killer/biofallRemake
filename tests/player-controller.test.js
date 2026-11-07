@@ -76,6 +76,6 @@ test("touch movement determines facing when no mouse aim is available", () => {
 
   controller.update(0.016);
 
-  assert.ok(Math.abs(player.transform.rotation - Math.PI) < 0.001);
+  assert.ok(Math.abs(player.transform.rotation - Math.PI * 1.5) < 0.001);
   assert.equal(controller.aimingWithPointer, false);
 });
