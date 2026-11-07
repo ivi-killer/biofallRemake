@@ -1,17 +1,16 @@
 import { Vector2 } from "../math/Vector2.js";
 import { MathUtils } from "../math/MathUtils.js";
-import { RigidBody } from "../physics/RigidBody.js";
 
 export class Camera2D {
   constructor({
     x = 0,
     y = 0,
     zoom = 1.25,
-    smoothing = 8,
-    lookAhead = 0.15,
-    maxLookAhead = 42,
-    dynamicZoom = 0.025,
-    zoomSmoothing = 5
+    smoothing = 0,
+    lookAhead = 0,
+    maxLookAhead = 0,
+    dynamicZoom = 0,
+    zoomSmoothing = 0
   } = {}) {
     this.position = new Vector2(x, y);
     this.target = null;
@@ -45,37 +44,23 @@ export class Camera2D {
     if (!this.target) return;
 
     const focus = this.target.transform?.position ?? this.target.position ?? this.target;
-    const body = this.target.getComponent?.(RigidBody);
-    const velocity = body?.velocity ?? this.target.velocity ?? { x: 0, y: 0 };
-    const speed = Math.hypot(velocity.x, velocity.y);
-
-    let lookX = velocity.x * this.lookAhead;
-    let lookY = velocity.y * this.lookAhead;
-    const lookDistance = Math.hypot(lookX, lookY);
-
-    if (lookDistance > this.maxLookAhead && lookDistance > 0) {
-      const scale = this.maxLookAhead / lookDistance;
-      lookX *= scale;
-      lookY *= scale;
-    }
-
-    const destinationX = focus.x + lookX;
-    const destinationY = focus.y + lookY;
     const frameDelta = Math.max(0, Number(delta) || 0);
     const positionBlend = this.smoothing <= 0
       ? 1
       : 1 - Math.exp(-this.smoothing * frameDelta);
 
-    this.position.x = MathUtils.lerp(this.position.x, destinationX, positionBlend);
-    this.position.y = MathUtils.lerp(this.position.y, destinationY, positionBlend);
+    // Core gameplay keeps the player at the viewport center by default.
+    this.position.x = MathUtils.lerp(this.position.x, focus.x, positionBlend);
+    this.position.y = MathUtils.lerp(this.position.y, focus.y, positionBlend);
 
-    // Keep the player prominent while allowing only a subtle speed-based pullback.
-    const speedRatio = Math.min(speed / 230, 1);
-    const targetZoom = Math.max(this.baseZoom * 0.94, this.baseZoom - this.dynamicZoom * speedRatio);
-    const zoomBlend = this.zoomSmoothing <= 0
-      ? 1
-      : 1 - Math.exp(-this.zoomSmoothing * frameDelta);
-    this.zoom = MathUtils.lerp(this.zoom, targetZoom, zoomBlend);
+    // Zoom remains fixed unless a future camera mode explicitly enables dynamic zoom.
+    if (this.dynamicZoom <= 0 || this.zoomSmoothing <= 0) {
+      this.zoom = this.baseZoom;
+    } else {
+      const targetZoom = Math.max(this.baseZoom * 0.94, this.baseZoom - this.dynamicZoom);
+      const zoomBlend = 1 - Math.exp(-this.zoomSmoothing * frameDelta);
+      this.zoom = MathUtils.lerp(this.zoom, targetZoom, zoomBlend);
+    }
   }
 
   worldToScreen(point) {
