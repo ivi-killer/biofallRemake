@@ -1,41 +1,45 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Entity } from "../src/engine/entities/Entity.js";
-import { RigidBody } from "../src/engine/physics/RigidBody.js";
 import { Camera2D } from "../src/engine/world/Camera2D.js";
 
-function createMovingTarget() {
-  const entity = new Entity("Target");
-  const body = entity.addComponent(new RigidBody());
-  return { entity, body };
-}
-
-test("camera anticipates the target velocity with a capped look-ahead", () => {
-  const { entity, body } = createMovingTarget();
-  entity.transform.position.set(100, 50);
-  body.velocity.set(200, 0);
-  const camera = new Camera2D({ smoothing: 100, lookAhead: 0.2, maxLookAhead: 30, dynamicZoom: 0 });
-  camera.follow(entity);
+test("camera stays centered on the target without look-ahead", () => {
+  const target = new Entity("Target");
+  target.transform.position.set(100, 50);
+  const camera = new Camera2D();
+  camera.follow(target);
   camera.update(1);
-  assert.ok(Math.abs(camera.position.x - 130) < 0.1);
-  assert.ok(Math.abs(camera.position.y - 50) < 0.1);
+
+  assert.equal(camera.position.x, 100);
+  assert.equal(camera.position.y, 50);
+  assert.equal(camera.zoom, 1.25);
 });
 
-test("camera keeps a close framing and only pulls back slightly at speed", () => {
-  const { entity, body } = createMovingTarget();
-  body.velocity.set(220, 0);
-  const camera = new Camera2D({ smoothing: 0, lookAhead: 0, dynamicZoom: 0.08, zoomSmoothing: 100 });
-  camera.follow(entity);
-  camera.update(1);
-  assert.equal(camera.baseZoom, 1.25);
-  assert.ok(camera.zoom < camera.baseZoom);
-  assert.ok(camera.zoom >= camera.baseZoom * 0.94 - 0.001);
-});
+test("camera keeps its framing fixed while the target moves", () => {
+  const target = new Entity("Target");
+  const camera = new Camera2D();
+  camera.follow(target);
 
-test("camera can still follow a plain position vector", () => {
-  const camera = new Camera2D({ smoothing: 0, dynamicZoom: 0 });
-  camera.follow({ x: 24, y: -12 });
+  target.transform.position.set(40, -20);
   camera.update(0.016);
-  assert.equal(camera.position.x, 24);
-  assert.equal(camera.position.y, -12);
+  assert.deepEqual(camera.position, target.transform.position);
+  assert.equal(camera.zoom, 1.25);
+
+  target.transform.position.set(80, 15);
+  camera.update(0.016);
+  assert.deepEqual(camera.position, target.transform.position);
+  assert.equal(camera.zoom, 1.25);
+});
+
+test("camera centers the target in screen coordinates", () => {
+  const target = new Entity("Target");
+  target.transform.position.set(24, -12);
+  const camera = new Camera2D({ zoom: 1.25 });
+  camera.setViewport(1280, 720);
+  camera.follow(target);
+  camera.update(0.016);
+
+  const screen = camera.worldToScreen(target.transform.position);
+  assert.equal(screen.x, 640);
+  assert.equal(screen.y, 360);
 });
