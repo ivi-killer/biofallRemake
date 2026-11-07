@@ -79,3 +79,28 @@ test("touch movement determines facing when no mouse aim is available", () => {
   assert.ok(Math.abs(player.transform.rotation - Math.PI * 1.5) < 0.001);
   assert.equal(controller.aimingWithPointer, false);
 });
+
+test("right aim joystick points independently from movement", () => {
+  const { player, controller, input } = createPlayer();
+  input.virtualJoystick.x = -1;
+  input.aimJoystick = { x: 1, y: 0, active: true };
+
+  controller.update(0.016);
+
+  assert.equal(controller.direction.x, -1);
+  assert.equal(controller.aimingWithJoystick, true);
+  assert.ok(Math.abs(player.transform.rotation - Math.PI) < 0.001);
+});
+
+test("movement direction is used again after releasing the aim joystick", () => {
+  const { player, controller, input } = createPlayer();
+  input.virtualJoystick.x = 1;
+  input.aimJoystick = { x: 0, y: -1, active: true };
+  controller.update(0.016);
+  input.aimJoystick.active = false;
+
+  controller.update(0.016);
+
+  assert.equal(controller.aimingWithJoystick, false);
+  assert.ok(Math.abs(player.transform.rotation - Math.PI / 2) < 0.001);
+});
